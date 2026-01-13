@@ -351,7 +351,7 @@ function App() {
             pc.addTransceiver("audio", { direction: "recvonly" });
             pc.addTransceiver("video", { direction: "recvonly" });
 
-                pc.ontrack = (event) => {
+            pc.ontrack = (event) => {
                 const [stream] = event.streams;
                 if (!stream) {
                     return;
@@ -479,96 +479,121 @@ function App() {
     }, [appendLog]);
 
     return (
-        <main>
-            <h1>CI&T - Azure Voice Live Avatar Agent</h1>
-            <p>Stream audio to Azure Voice Live, receive tool-calling responses, and render avatar video.</p>
+        <main className="main-with-sidebar">
+            {/* Barra lateral de controles */}
+            <aside className="sidebar-controls">
+                <img className="logo" src="img/logo.png" />
+                <h3>Controls</h3>
 
-            <section className="section">
-                <h2>Controls</h2>
-                <div className="controls">
-                    <button 
-                        onClick={() => window.location.reload()} 
-                        className="refresh-button"
+                <div className="vertical-buttons">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="refresh-button sidebar-btn"
                         title="Click on Refresh to get started with this demo"
                     >
                         🔄 Refresh
                     </button>
-                    <button onClick={micActive ? stopMic : startMic}>{micActive ? "Stop Microphone" : "Start Microphone"}</button>
-                    <button className="secondary" onClick={sendTextPrompt} disabled={!sessionId}>
-                        Send Text Prompt
+                    <button
+                        onClick={micActive ? stopMic : startMic}
+                        className="sidebar-btn"
+                    >
+                        {micActive ? "🎤 Stop Mic" : "🎤 Start Mic"}
                     </button>
-                    <button onClick={startAvatar} disabled={!sessionId || avatarLoading || avatarReady}>
-                        {avatarLoading ? "Connecting Avatar..." : "Start Avatar"}
+                    <button
+                        className="secondary sidebar-btn"
+                        onClick={sendTextPrompt}
+                        disabled={!sessionId}
+                    >
+                        💬 Send Text
                     </button>
-                    <button 
-                        onClick={avatarPaused ? unpauseAvatar : pauseAvatar} 
+                    <button
+                        onClick={startAvatar}
+                        disabled={!sessionId || avatarLoading || avatarReady}
+                        className="sidebar-btn"
+                    >
+                        {avatarLoading ? "⏳ Connecting..." : "▶️ Start Avatar"}
+                    </button>
+                    <button
+                        onClick={avatarPaused ? unpauseAvatar : pauseAvatar}
                         disabled={!avatarReady || avatarLoading}
+                        className="sidebar-btn"
                     >
-                        {avatarPaused ? "Resume Avatar" : "Pause Avatar"}
+                        {avatarPaused ? "▶️ Resume" : "⏸️ Pause"}
                     </button>
-                    <button 
-                        onClick={() => {}} 
-                        disabled={true}
-                        className="danger"
-                        title="Not implemented yet"
+                    <button
+                        onClick={teardownAvatar}
+                        disabled={!avatarReady}
+                        className="danger sidebar-btn"
+                        title="Stop avatar connection"
                     >
-                        Stop Avatar
+                        ⏹️ Stop Avatar
                     </button>
                 </div>
-            </section>
+            </aside>
 
-            <section className="section video-wrapper">
-                <h2>Avatar Stream</h2>
-                <div className="video-container">
-                    <video ref={videoRef} autoPlay playsInline muted={false} controls={false} />
-                    {avatarLoading && (
-                        <div className="avatar-loading-overlay">
-                            <div className="loading-spinner"></div>
-                            <p>Loading Avatar...</p>
-                        </div>
-                    )}
-                    {avatarPaused && avatarReady && (
-                        <div className="avatar-paused-overlay">
-                            <div className="pause-icon">⏸️</div>
-                            <p>Avatar Paused</p>
-                        </div>
-                    )}
-                    {!avatarReady && !avatarLoading && (
-                        <div className="avatar-placeholder">
-                            <p>Click "Start Avatar" to begin video stream</p>
-                        </div>
-                    )}
-                </div>
-            </section>
+            {/* Conteúdo principal */}
+            <div className="main-content">
+                <h1>CI&T - Azure Voice Live Avatar Agent</h1>
+                <p>Stream audio to Azure Voice Live, receive tool-calling responses, and render avatar video.</p>
 
-            <section className="section">
-                <h2>Transcripts</h2>
-                <div>
-                    <strong>User:</strong>
-                    <p>{userTranscript || "(waiting for speech)"}</p>
+                {/* Container com vídeo e transcripts lado a lado */}
+                <div className="video-transcripts-row">
+                    <section className="section video-wrapper">
+                        <h2>Avatar Stream</h2>
+                        <div className="video-container">
+                            <video ref={videoRef} autoPlay playsInline muted={false} controls={false} />
+                            {avatarLoading && (
+                                <div className="avatar-loading-overlay">
+                                    <div className="loading-spinner"></div>
+                                    <p>Loading Avatar...</p>
+                                </div>
+                            )}
+                            {avatarPaused && avatarReady && (
+                                <div className="avatar-paused-overlay">
+                                    <div className="pause-icon">⏸️</div>
+                                    <p>Avatar Paused</p>
+                                </div>
+                            )}
+                            {!avatarReady && !avatarLoading && (
+                                <div className="avatar-placeholder">
+                                    <p>Click "Start Avatar" to begin video stream</p>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    <section className="section transcripts-panel">
+                        <h2>Transcripts</h2>
+                        <div className="transcript-content">
+                            <div className="transcript-block">
+                                <strong>👤 User:</strong>
+                                <p className="transcript-text">{userTranscript || "(waiting for speech)"}</p>
+                            </div>
+                            <div className="transcript-block">
+                                <strong>🤖 Assistant:</strong>
+                                <div className="assistant-response">
+                                    {assistantTranscript ? (
+                                        <ReactMarkdown>{assistantTranscript}</ReactMarkdown>
+                                    ) : (
+                                        <p className="transcript-text">(waiting for response)</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </div>
-                <div>
-                    <strong>Assistant:</strong>
-                    <div className="assistant-response">
-                        {assistantTranscript ? (
-                            <ReactMarkdown>{assistantTranscript}</ReactMarkdown>
-                        ) : (
-                            <p>(waiting for response)</p>
-                        )}
+
+                <section className="section">
+                    <h2>Event Log</h2>
+                    <div className="log-pane">
+                        {entries.map((entry) => (
+                            <div key={entry.id} className="log-entry">
+                                {entry.text}
+                            </div>
+                        ))}
                     </div>
-                </div>
-            </section>
-
-            <section className="section">
-                <h2>Event Log</h2>
-                <div className="log-pane">
-                    {entries.map((entry) => (
-                        <div key={entry.id} className="log-entry">
-                            {entry.text}
-                        </div>
-                    ))}
-                </div>
-            </section>
+                </section>
+            </div>
         </main>
     );
 }
