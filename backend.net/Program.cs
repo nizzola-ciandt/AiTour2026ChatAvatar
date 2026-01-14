@@ -19,9 +19,8 @@ builder.Services.Configure<AzureVoiceSettings>(
 
 // Register services
 builder.Services.AddSingleton<ISessionManager, SessionManager>();
-builder.Services.AddScoped<IAudioUtilsService, AudioUtilsService>();
-//builder.Services.AddScoped<IVoiceLiveSession, VoiceLiveSession>();
-builder.Services.AddScoped<IToolsService, ToolsService>();
+builder.Services.AddSingleton<IAudioUtilsService, AudioUtilsService>();
+builder.Services.AddSingleton<IToolsService, ToolsService>();
 
 // Register HTTP clients
 builder.Services.AddHttpClient();
