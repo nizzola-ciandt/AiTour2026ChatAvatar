@@ -210,3 +210,44 @@ async def serve_spa(full_path: str):
     
     # Fallback 404 for missing routes
     raise HTTPException(status_code=404, detail="Not found")
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+    phone: str
+    position: str
+    company: str
+
+class CreateUserResponse(BaseModel):
+    status: str
+    user_id: str
+    message: str
+
+@app.post("/createuser", response_model=CreateUserResponse)
+async def create_user(request: CreateUserRequest) -> CreateUserResponse:
+    """
+    Endpoint para cadastro de usuários.
+    Recebe nome, email e telefone e retorna confirmação.
+    """
+    try:
+        # Aqui você pode adicionar lógica para salvar em banco de dados
+        # Por enquanto, apenas validamos e retornamos sucesso
+        
+        logger.info(f"New user registration - Name: {request.name}, Email: {request.email}, Phone: {request.phone}, Position: {request.position}, Company: {request.company}")
+        
+        # Gerar um ID único para o usuário
+        import uuid
+        user_id = str(uuid.uuid4())
+        logger.info(f"User Id:{user_id}")
+        
+        # Aqui você pode adicionar integração com banco de dados ou outro serviço
+        # Exemplo: await save_user_to_database(user_id, request.name, request.email, request.phone)
+        
+        return CreateUserResponse(
+            status="success",
+            user_id=user_id,
+            message="Usuário cadastrado com sucesso"
+        )
+    except Exception as e:
+        logger.error(f"Error creating user: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao cadastrar usuário: {str(e)}")
