@@ -62,7 +62,7 @@ def _post_json(url: str, payload: Dict[str, Any]) -> str:
     response.raise_for_status()
     return response.text
 
-
+"""
 def create_delivery_order(order_id: str, destination: str) -> str:
     api_url = _ensure_env("logic_app_url_shipment_orders")
     return json.dumps(_post_json(api_url, {"order_id": order_id, "destination": destination}))
@@ -103,20 +103,20 @@ def order_products(product_id: str, quantity: int) -> Any:
     )
     response.raise_for_status()
     return response.json()
-
+"""
 
 TOOLS_LIST = [
     {
         "type": "function",
         "name": "perform_search_based_qna",
-        "description": "call this function to respond to the user query on Contoso retail policies, procedures and general QnA",
+        "description": "call this function to respond to the user query on CI&T enterprise informations, procedures and general QnA",
         "parameters": {
             "type": "object",
             "properties": {"query": {"type": "string"}},
             "required": ["query"],
         },
     },
-    {
+    """ {
         "type": "function",
         "name": "create_delivery_order",
         "description": "call this function to create a delivery order based on order id and destination location",
@@ -178,14 +178,14 @@ TOOLS_LIST = [
             },
             "required": ["product_id", "quantity"],
         },
-    },
+    }, """
 ]
 
 AVAILABLE_FUNCTIONS: Dict[str, Callable[..., Any]] = {
     "perform_search_based_qna": perform_search_based_qna,
-    "create_delivery_order": create_delivery_order,
-    "perform_call_log_analysis": perform_call_log_analysis,
-    "get_products_by_category": get_products_by_category,
-    "search_products_by_category_and_price": search_products_by_category_and_price,
-    "order_products": order_products,
+    # "create_delivery_order": create_delivery_order,
+    # "perform_call_log_analysis": perform_call_log_analysis,
+    # "get_products_by_category": get_products_by_category,
+    # "search_products_by_category_and_price": search_products_by_category_and_price,
+    # "order_products": order_products,
 }
