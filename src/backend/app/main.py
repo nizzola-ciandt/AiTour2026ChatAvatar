@@ -4,6 +4,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict
+from datetime import datetime
 
 from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,8 @@ import os
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
+from azure.data.tables.aio import TableServiceClient
+from azure.core.exceptions import ResourceExistsError, AzureError
 
 from .session_manager import SessionManager
 
@@ -40,12 +43,90 @@ class TextMessageRequest(BaseModel):
 class AudioCommitResponse(BaseModel):
     status: str
 
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+    phone: str
+    position: str
+    company: str
+
+class CreateUserResponse(BaseModel):
+    status: str
+    user_id: str
+    message: str
 
 session_manager = SessionManager()
 
 # Load environment variables
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
+# Azure Table Storage client (global)
+table_service_client = None
+table_client = None
+
+
+async def init_azure_table_storage():
+    """Initialize Azure Table Storage connection"""
+    global table_service_client, table_client
+    
+    connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+    table_name = os.getenv("AZURE_TABLE_NAME", "users")
+    
+    if not connection_string:
+        logger.error("AZURE_STORAGE_CONNECTION_STRING not found in environment variables")
+        raise ValueError("Azure Storage connection string not configured")
+    
+    try:
+        # Create TableServiceClient
+        table_service_client = TableServiceClient.from_connection_string(connection_string)
+        
+        # Create table if it doesn't exist
+        try:
+            await table_service_client.create_table(table_name)
+            logger.info(f"Created Azure Table: {table_name}")
+        except ResourceExistsError:
+            logger.info(f"Azure Table already exists: {table_name}")
+        
+        # Get table client
+        table_client = table_service_client.get_table_client(table_name)
+        logger.info("Azure Table Storage initialized successfully")
+        
+    except Exception as e:
+        logger.error(f"Failed to initialize Azure Table Storage: {str(e)}")
+        raise
+
+
+async def save_user_to_azure_table(user_id: str, name: str, email: str, phone: str, position: str, company: str):
+    """Save user data to Azure Table Storage"""
+    if not table_client:
+        raise Exception("Azure Table Storage not initialized")
+    
+    try:
+        # Prepare entity
+        # PartitionKey: Usamos a empresa para particionar (ou 'default' se não tiver)
+        # RowKey: Usamos o user_id único
+        entity = {
+            "PartitionKey": company.replace(" ", "_").lower() if company else "default",
+            "RowKey": user_id,
+            "Name": name,
+            "Email": email,
+            "Phone": phone,
+            "Position": position,
+            "Company": company,
+            "CreatedAt": datetime.utcnow().isoformat(),
+            "UpdatedAt": datetime.utcnow().isoformat()
+        }
+        
+        # Insert entity
+        await table_client.create_entity(entity=entity)
+        logger.info(f"User {user_id} saved to Azure Table Storage successfully")
+        
+    except AzureError as e:
+        logger.error(f"Azure Table Storage error: {str(e)}")
+        raise Exception(f"Failed to save user to Azure Table Storage: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error saving user: {str(e)}")
+        raise
 
 async def warmup_ecom_api():
     """Warm up the ecom API by calling the /openapi endpoint"""
@@ -80,14 +161,22 @@ async def warmup_ecom_api():
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # pylint: disable=unused-argument
     try:
+        # Startup: Initialize Azure Table Storage
+        await init_azure_table_storage()
+        
         # Startup: warm up the ecom API
         await warmup_ecom_api()
+        
         yield
     finally:
+        # Cleanup: Close Azure Table Storage connection
+        if table_service_client:
+            await table_service_client.close()
+            logger.info("Azure Table Storage connection closed")
+        
         # ensure all sessions are cleaned up
         remaining = await session_manager.list_session_ids()
         await asyncio.gather(*[session_manager.remove_session(session_id) for session_id in remaining])
-
 
 app = FastAPI(title="Azure Voice Live Avatar Backend", lifespan=lifespan)
 app.add_middleware(
@@ -211,43 +300,38 @@ async def serve_spa(full_path: str):
     # Fallback 404 for missing routes
     raise HTTPException(status_code=404, detail="Not found")
 
-class CreateUserRequest(BaseModel):
-    name: str
-    email: str
-    phone: str
-    position: str
-    company: str
-
-class CreateUserResponse(BaseModel):
-    status: str
-    user_id: str
-    message: str
 
 @app.post("/createuser", response_model=CreateUserResponse)
 async def create_user(request: CreateUserRequest) -> CreateUserResponse:
     """
     Endpoint para cadastro de usuários.
-    Recebe nome, email e telefone e retorna confirmação.
+    Recebe nome, email, telefone, posição e empresa e salva no Azure Table Storage.
     """
     try:
-        # Aqui você pode adicionar lógica para salvar em banco de dados
-        # Por enquanto, apenas validamos e retornamos sucesso
-        
-        logger.info(f"New user registration - Name: {request.name}, Email: {request.email}, Phone: {request.phone}, Position: {request.position}, Company: {request.company}")
+        logger.info(f"New user registration - Name: {request.name}, Email: {request.email}, "
+                   f"Phone: {request.phone}, Position: {request.position}, Company: {request.company}")
         
         # Gerar um ID único para o usuário
         import uuid
         user_id = str(uuid.uuid4())
-        logger.info(f"User Id:{user_id}")
+        logger.info(f"User Id: {user_id}")
         
-        # Aqui você pode adicionar integração com banco de dados ou outro serviço
-        # Exemplo: await save_user_to_database(user_id, request.name, request.email, request.phone)
+        # Salvar no Azure Table Storage
+        await save_user_to_azure_table(
+            user_id=user_id,
+            name=request.name,
+            email=request.email,
+            phone=request.phone,
+            position=request.position,
+            company=request.company
+        )
         
         return CreateUserResponse(
             status="success",
             user_id=user_id,
-            message="Usuário cadastrado com sucesso"
+            message="Usuário cadastrado com sucesso no Azure Table Storage"
         )
+        
     except Exception as e:
         logger.error(f"Error creating user: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao cadastrar usuário: {str(e)}")
