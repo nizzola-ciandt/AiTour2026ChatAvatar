@@ -88,18 +88,13 @@ function RegisterForm({ onRegisterComplete }: RegisterFormProps) {
                 <div className="register-logo">
                     <div className="logo-placeholder">
                         {/* Substitua este div pela sua logo */}
-                        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="60" cy="60" r="55" stroke="#38bdf8" strokeWidth="3" fill="rgba(56, 189, 248, 0.1)"/>
-                            <path d="M45 60C45 51.7157 51.7157 45 60 45C68.2843 45 75 51.7157 75 60" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round"/>
-                            <circle cx="50" cy="50" r="4" fill="#38bdf8"/>
-                            <circle cx="70" cy="50" r="4" fill="#38bdf8"/>
-                            <path d="M45 70C45 65 50 62 60 62C70 62 75 65 75 70" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round"/>
-                        </svg>
+                        <img src="img/logo-blue.png" />
+                        <h1>Azure Voice Live Avatar</h1>
                     </div>
+                    
                 </div>
 
                 <div className="register-header">
-                    <h1>CI&T - Azure Voice Live Avatar</h1>
                     <p>Cadastre-se para iniciar sua experiência com nosso assistente virtual</p>
                 </div>
 
@@ -164,7 +159,7 @@ function RegisterForm({ onRegisterComplete }: RegisterFormProps) {
                     {/* Campos Opcionais */}
                     <div className="form-section">
                         <h3 className="section-title optional">
-                            Informações Adicionais <span className="optional-badge">Opcional</span>
+                            Informações Adicionais 
                         </h3>
                         
                         <div className="form-row">
@@ -224,7 +219,7 @@ function RegisterForm({ onRegisterComplete }: RegisterFormProps) {
                     <p>
                         <span className="required">*</span> Campos obrigatórios
                         <span className="separator">•</span>
-                        Seus dados serão utilizados apenas para esta sessão
+                        Seus dados poderão ser utilizados para futuros contatos
                     </p>
                 </div>
             </div>
