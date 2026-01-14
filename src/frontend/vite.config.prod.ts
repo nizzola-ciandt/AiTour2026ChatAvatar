@@ -11,14 +11,11 @@ export default defineConfig(() => ({
   server: {
     port: 5173,
     proxy: {
-      "/sessions": {
+      // Proxy para endpoints da API (qualquer rota que não seja estática)
+      "^/(sessions|ws|createuser|health)": {
         target: "http://localhost:8000",
-        changeOrigin: true
-      },
-      "/ws": {
-        target: "ws://localhost:8000",
-        ws: true,
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true  // Suporta WebSocket para /ws
       }
     }
   }

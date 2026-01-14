@@ -1,0 +1,14 @@
+## .NET específico
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.swp
+*~
+.vscode/
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
