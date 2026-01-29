@@ -516,77 +516,97 @@ function AvatarChat({ userData, onEndConversation }: AvatarChatProps) {
                 <div className="controls">
                     <button 
                         onClick={() => window.location.reload()} 
-                        className="refresh-button"
-                        title="Click on Refresh to restart the session"
+                        className="icon-button refresh-button"
+                        title="Refresh - Click to restart the session"
                     >
-                        🔄 Refresh
+                        🔄
                     </button>
-                    <button onClick={micActive ? stopMic : startMic}>
-                        {micActive ? "Stop Microphone" : "Start Microphone"}
+                    <button 
+                        onClick={micActive ? stopMic : startMic}
+                        className="icon-button"
+                        title={micActive ? "Stop Microphone" : "Start Microphone"}
+                    >
+                        {micActive ? "🎤" : "🎙️"}
                     </button>
-                    <button className="secondary" onClick={sendTextPrompt} disabled={!sessionId}>
-                        Send Text Prompt
+                    <button 
+                        className="icon-button secondary" 
+                        onClick={sendTextPrompt} 
+                        disabled={!sessionId}
+                        title="Send Text Prompt"
+                    >
+                        💬
                     </button>
-                    <button onClick={startAvatar} disabled={!sessionId || avatarLoading || avatarReady}>
-                        {avatarLoading ? "Connecting Avatar..." : "Start Avatar"}
+                    <button 
+                        onClick={startAvatar} 
+                        disabled={!sessionId || avatarLoading || avatarReady}
+                        className="icon-button"
+                        title={avatarLoading ? "Connecting Avatar..." : "Start Avatar"}
+                    >
+                        {avatarLoading ? "⏳" : "▶️"}
                     </button>
                     <button 
                         onClick={avatarPaused ? unpauseAvatar : pauseAvatar} 
                         disabled={!avatarReady || avatarLoading}
+                        className="icon-button"
+                        title={avatarPaused ? "Resume Avatar" : "Pause Avatar"}
                     >
-                        {avatarPaused ? "Resume Avatar" : "Pause Avatar"}
+                        {avatarPaused ? "▶️" : "⏸️"}
                     </button>
                     <button 
                         onClick={handleEndConversation} 
-                        className="danger"
+                        className="icon-button danger"
                         title="Encerrar conversa e voltar ao início"
                     >
-                        Encerrar Conversa
+                        🚪
                     </button>
                 </div>
             </section>
 
-            <section className="section video-wrapper">
-                <h2>Avatar Stream</h2>
-                <div className="video-container">
-                    <video ref={videoRef} autoPlay playsInline muted={false} controls={false} />
-                    {avatarLoading && (
-                        <div className="avatar-loading-overlay">
-                            <div className="loading-spinner"></div>
-                            <p>Loading Avatar...</p>
-                        </div>
-                    )}
-                    {avatarPaused && avatarReady && (
-                        <div className="avatar-paused-overlay">
-                            <div className="pause-icon">⏸️</div>
-                            <p>Avatar Paused</p>
-                        </div>
-                    )}
-                    {!avatarReady && !avatarLoading && (
-                        <div className="avatar-placeholder">
-                            <p>Click "Start Avatar" to begin video stream</p>
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            <section className="section">
-                <h2>Transcripts</h2>
-                <div>
-                    <strong>User:</strong>
-                    <p>{userTranscript || "(waiting for speech)"}</p>
-                </div>
-                <div>
-                    <strong>Assistant:</strong>
-                    <div className="assistant-response">
-                        {assistantTranscript ? (
-                            <ReactMarkdown>{assistantTranscript}</ReactMarkdown>
-                        ) : (
-                            <p>(waiting for response)</p>
+            <div className="content-grid">
+                <section className="section avatar-section">
+                    <h2>Avatar Stream</h2>
+                    <div className="video-container">
+                        <video ref={videoRef} autoPlay playsInline muted={false} controls={false} />
+                        {avatarLoading && (
+                            <div className="avatar-loading-overlay">
+                                <div className="loading-spinner"></div>
+                                <p>Loading Avatar...</p>
+                            </div>
+                        )}
+                        {avatarPaused && avatarReady && (
+                            <div className="avatar-paused-overlay">
+                                <div className="pause-icon">⏸️</div>
+                                <p>Avatar Paused</p>
+                            </div>
+                        )}
+                        {!avatarReady && !avatarLoading && (
+                            <div className="avatar-placeholder">
+                                <p>Click "▶️" to begin video stream</p>
+                            </div>
                         )}
                     </div>
-                </div>
-            </section>
+                </section>
+
+                <section className="section transcript-section">
+                    <h2>Transcripts</h2>
+                    <div className="transcript-content">
+                        <div className="transcript-block">
+                            <strong>👤 User:</strong>
+                            <p>{userTranscript || "(waiting for speech)"}</p>
+                        </div>
+                        <div className="transcript-block">
+                            <strong>🤖 Assistant:</strong>
+                            <div className="assistant-response">
+                                {assistantTranscript ? (
+                                    <ReactMarkdown>{assistantTranscript}</ReactMarkdown>
+                                ) : (
+                                    <p>(waiting for response)</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
 
             <section className="section">
                 <h2>Event Log</h2>

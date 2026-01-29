@@ -27,13 +27,13 @@ COMMON_CHARACTERS = [
 
 async def test_avatar_character(character_name: str, style: str | None) -> tuple[str, bool, str]:
     """Test if a character + style combination is valid using proper WebRTC negotiation."""
-    endpoint = os.getenv("AZURE_VOICE_LIVE_ENDPOINT")
-    api_key = os.getenv("AZURE_OPENAI_API_KEY")
-    api_version = os.getenv("AZURE_VOICE_LIVE_API_VERSION", "2025-05-01-preview")
-    model = os.getenv("VOICE_LIVE_MODEL", "gpt-realtime")
+    endpoint = os.getenv("azure-voice-live-endpoint")
+    api_key = os.getenv("azure-openai-api-key")
+    api_version = os.getenv("azure-voice-live-api-version", "2025-05-01-preview")
+    model = os.getenv("voice-live-model", "gpt-realtime")
     
     if not endpoint or not api_key:
-        print("Error: AZURE_VOICE_LIVE_ENDPOINT and AZURE_OPENAI_API_KEY must be set")
+        print("Error: 'azure-voice-live-endpoint' and azure-openai-api-key must be set")
         sys.exit(1)
     
     # Build WebSocket URL - MUST use /voice-live/realtime path
@@ -229,7 +229,7 @@ async def main():
     print("=" * 80)
     print("Testing Avatar Characters for Azure Voice Live")
     print("=" * 80)
-    print(f"Endpoint: {os.getenv('AZURE_VOICE_LIVE_ENDPOINT')}")
+    print(f"Endpoint: {os.getenv('azure-voice-live-endpoint')}")
     print(f"Testing {len(COMMON_CHARACTERS)} character + style combinations...")
     print("Using REAL WebRTC negotiation with aiortc\n")
     
@@ -259,11 +259,11 @@ async def main():
         if "+" in first_valid:
             char, style = first_valid.split("+")
             print(f"\nUpdate your .env file:")
-            print(f"AZURE_VOICE_AVATAR_CHARACTER={char}")
-            print(f"AZURE_VOICE_AVATAR_STYLE={style}")
+            print(f"azure-voice-avatar-character={char}")
+            print(f"azure-voice-avatar-style={style}")
         else:
             print(f"\nUpdate your .env file:")
-            print(f"AZURE_VOICE_AVATAR_CHARACTER={first_valid}")
+            print(f"azure-voice-avatar-character={first_valid}")
     else:
         print("  No valid characters found from the common list.")
         print("\n  This could mean:")

@@ -11,9 +11,9 @@ from azure.search.documents import SearchClient
 
 logger = logging.getLogger(__name__)
 
-search_endpoint = os.getenv("ai_search_url")
-search_key = os.getenv("ai_search_key")
-index_name = os.getenv("ai_index_name")
+search_endpoint = os.getenv("ai-search-url")
+search_key = os.getenv("ai-search-key")
+index_name = os.getenv("ai-index-name")
 semantic_config = os.getenv("ai_semantic_config")
 logic_app_url_shipment_orders = os.getenv("logic_app_url_shipment_orders")
 logic_app_url_call_log_analysis = os.getenv("logic_app_url_call_log_analysis")
@@ -29,18 +29,22 @@ def _ensure_env(var_name: str) -> str:
 
 def perform_search_based_qna(query: str) -> str:
     logger.info("perform_search_based_qna - query: %s", query)
-    endpoint = _ensure_env("ai_search_url")
-    key = _ensure_env("ai_search_key")
-    index = _ensure_env("ai_index_name")
+    endpoint = _ensure_env("ai-search-url")
+    key = _ensure_env("ai-search-key")
+    index = _ensure_env("ai-index-name")
     semantic = _ensure_env("ai_semantic_config")
 
     credential = AzureKeyCredential(key)
     client = SearchClient(endpoint=endpoint, index_name=index, credential=credential)
     response = client.search(
+        search_text=query
+    )
+
+    """ response = client.search(
         search_text=query,
         query_type="semantic",
         semantic_configuration_name=semantic,
-    )
+    ) """
 
     response_docs = []
     for counter, result in enumerate(response):

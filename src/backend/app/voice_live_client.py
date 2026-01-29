@@ -96,14 +96,14 @@ class VoiceLiveSession:
         self._avatar_future: Optional[asyncio.Future] = None
         self._connected_event = asyncio.Event()
 
-        endpoint = os.getenv("AZURE_VOICE_LIVE_ENDPOINT")
-        model = os.getenv("VOICE_LIVE_MODEL")
+        endpoint = os.getenv("azure-voice-live-endpoint")
+        model = os.getenv("voice-live-model")
         if not endpoint or not model:
-            raise RuntimeError("AZURE_VOICE_LIVE_ENDPOINT and VOICE_LIVE_MODEL must be set")
+            raise RuntimeError("'azure-voice-live-endpoint' and voice-live-model must be set")
         self._endpoint = endpoint
         self._model = model
-        self._api_version = os.getenv("AZURE_VOICE_LIVE_API_VERSION", "2025-05-01-preview")
-        self._api_key = os.getenv("AZURE_OPENAI_API_KEY")
+        self._api_version = os.getenv("azure-voice-live-api-version", "2025-05-01-preview")
+        self._api_key = os.getenv("azure-openai-api-key")
         self._use_api_key = bool(self._api_key)
 
         self._session_config = {
@@ -121,7 +121,7 @@ class VoiceLiveSession:
             "input_audio_noise_reduction": {"type": "azure_deep_noise_suppression"},
             "input_audio_echo_cancellation": {"type": "server_echo_cancellation"},
             "voice": {
-                "name": os.getenv("AZURE_TTS_VOICE", "pt-BR-GiovannaNeural"),
+                "name": os.getenv("azure-tts-voice", "pt-BR-GiovannaNeural"),
                 "type": "azure-standard",
                 "temperature": 0.8,
             },
@@ -194,8 +194,8 @@ class VoiceLiveSession:
         return close_code is None
 
     def _build_avatar_config(self) -> Dict[str, Any]:
-        character = os.getenv("AZURE_VOICE_AVATAR_CHARACTER", "lisa")
-        style = os.getenv("AZURE_VOICE_AVATAR_STYLE")
+        character = os.getenv("azure-voice-avatar-character", "lisa")
+        style = os.getenv("azure-voice-avatar-style")
         video_width = int(os.getenv("AZURE_VOICE_AVATAR_WIDTH", "1280"))
         video_height = int(os.getenv("AZURE_VOICE_AVATAR_HEIGHT", "720"))
         bitrate = int(os.getenv("AZURE_VOICE_AVATAR_BITRATE", "2000000"))
