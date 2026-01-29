@@ -37,10 +37,14 @@ def perform_search_based_qna(query: str) -> str:
     credential = AzureKeyCredential(key)
     client = SearchClient(endpoint=endpoint, index_name=index, credential=credential)
     response = client.search(
+        search_text=query
+    )
+
+    """ response = client.search(
         search_text=query,
         query_type="semantic",
         semantic_configuration_name=semantic,
-    )
+    ) """
 
     response_docs = []
     for counter, result in enumerate(response):
