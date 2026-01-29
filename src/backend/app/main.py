@@ -69,11 +69,11 @@ async def init_azure_table_storage():
     """Initialize Azure Table Storage connection"""
     global table_service_client, table_client
     
-    connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-    table_name = os.getenv("AZURE_TABLE_NAME", "users")
+    connection_string = os.getenv("azure-storage-connection-string")
+    table_name = os.getenv("azure-table-name", "users")
     
     if not connection_string:
-        logger.error("AZURE_STORAGE_CONNECTION_STRING not found in environment variables")
+        logger.error("azure-storage-connection-string not found in environment variables")
         raise ValueError("Azure Storage connection string not configured")
     
     try:
